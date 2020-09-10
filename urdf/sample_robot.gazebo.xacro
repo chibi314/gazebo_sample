@@ -20,7 +20,13 @@
   <xacro:property name="d435_cam_depth_px" value="${d435_cam_mount_from_center_offset}"/>
   <xacro:property name="d435_cam_depth_py" value="0.0175"/>
   <xacro:property name="d435_cam_depth_pz" value="${d435_cam_height/2}"/>
-  
+
+  <link name="world"/>
+
+  <joint name="fixed" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+  </joint>
 
   <link name="base_link">
     <visual>
@@ -44,12 +50,33 @@
     </inertial>
   </link>
 
-  <joint name="joint1" type="fixed">
+  <joint name="joint1" type="continuous">
     <origin xyz="-2.0 0.0 1.0" rpy="0.0 1.57 0.0"/>
+    <axis xyz="0 1 0"/>
     <parent link="base_link"/>
     <child link="rs_d435_link"/>
   </joint>
-  <link name="rs_d435_link"/>
+
+  <link name="rs_d435_link">
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="0.1"/>
+      <inertia ixx="0.01" ixy="0" ixz="0"
+               iyy="0.01" iyz="0"
+               izz="0.01" />
+    </inertial>
+  </link>
+
+  <transmission name="tran1">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
 
     <!-- camera depth joints and links -->
   <joint name="rs_d435_depth_joint" type="fixed">

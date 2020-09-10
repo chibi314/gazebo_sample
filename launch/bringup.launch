@@ -10,7 +10,7 @@
   <group ns="$(arg robot_ns)">
     <param name="robot_description" command="$(find xacro)/xacro.py '$(arg model)'"/>
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
-          args="-urdf -model sample_robot -param robot_description"/>
+          args="-urdf -model $(arg robot_ns) -param robot_description"/>
 
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
@@ -23,7 +23,15 @@
     </node>
 
     <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(find gazebo_sample)/launch/gazebo_sample.rviz" respawn="true" />
-
   </group>
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find gazebo_sample)/config/control.yaml" command="load" ns="$(arg robot_ns)"/>
+  
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+        output="screen" ns="$(arg robot_ns)" args="joint_state_controller
+                                                   joint1_position_controller"/>
+  
 
 </launch>
